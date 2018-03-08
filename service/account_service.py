@@ -49,4 +49,5 @@ def add_phone(phone):
     cache_key = phone_verifycode_cache_key(phone)
     cache.set(cache_key, verify_code)
     cache.ttl(cache_key, 60)
+    raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
 

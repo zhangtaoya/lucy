@@ -3,6 +3,8 @@ from tornado import gen
 from base_handler import BaseHandler
 import log
 
+from service import account_service
+
 
 class AccountPhone_verifyHandler(BaseHandler):
     _label = 'HelloHandler'
@@ -10,7 +12,9 @@ class AccountPhone_verifyHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
-        self.jsonify({'ret': 1, 'data': {'msg': 'hello'}})
+        phone = self.params.get('phone', '')
+        ret = yield account_service.add_phone(phone)
+        self.jsonify(ret)
 
 
 
