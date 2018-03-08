@@ -1,8 +1,8 @@
-import logging
 import ujson
 from datetime import datetime
 import traceback
 from tornado import web
+
 
 class BaseHandler(web.RequestHandler):
     _label = 'BaseHandler'
@@ -59,7 +59,8 @@ class BaseHandler(web.RequestHandler):
             if "exc_info" in kwargs and status_code >= 500:
                 msg = "".join(traceback.format_exception(*kwargs.get("exc_info")))
                 msg += "uri:%s\nbody:%s\nfrom:xcspam" % (self.request.uri, self.params)
-                async_call_dingding(config.url_dingding_alarm_notify, msg)
+                #  error hook
+                #  async_call_dingding(config.url_dingding_alarm_notify, msg)
 
             self.finish("<html><title>%(code)d: %(message)s</title>"
                         "<body>%(code)d: %(message)s</body></html>" % {

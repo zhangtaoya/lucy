@@ -3,6 +3,7 @@ from tornado import gen
 from base_handler import BaseHandler
 import log
 
+
 class HelloHandler(BaseHandler):
     _label = 'HelloHandler'
 

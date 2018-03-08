@@ -11,6 +11,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 define('port', default=9000, type=int)
 
+
 class MyApplication(web.Application):
     def __init__(
             self, handlers=None,
@@ -32,7 +33,7 @@ def main():
     from route import routes as handlers
     app = MyApplication(
         handlers,
-        #debug=config.WEB_DEBUG,
+        #  debug=config.WEB_DEBUG,
         template_path='./template',
         static_path='./static',
     )
