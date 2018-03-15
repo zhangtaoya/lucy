@@ -33,7 +33,7 @@ def main():
     from route import routes as handlers
     app = MyApplication(
         handlers,
-        #  debug=config.WEB_DEBUG,
+        debug=True,
         template_path='./template',
         static_path='./static',
     )

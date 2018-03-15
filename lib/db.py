@@ -14,3 +14,5 @@ def get_redis(db=0):
 def get_col_account_member():
     return motordb.mongo_collection('account', 'member', config.DB_HOST, config.DB_PORT)
 
+def get_col_account_mid():
+    return motordb.mongo_collection('account', 'mid', config.DB_HOST, config.DB_PORT)

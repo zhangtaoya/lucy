@@ -31,7 +31,7 @@ class BaseHandler(web.RequestHandler):
         self.set_header('Date', datetime.now())
         self.set_header('Access-Control-Allow-Origin', '*')
 
-        response = ujson.dumps(response)
+        response = ujson.dumps(response, ensure_ascii=False)
         self.set_header('Content-Type', 'application/json; charset=utf-8')
         self.write(response)
         self.finish()
