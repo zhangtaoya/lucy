@@ -1,7 +1,9 @@
 from handler.hello_handler import *
 from handler.account_handler import *
+from handler.appstore_handler import *
 routes = [
     (r'/api/hello', HelloHandler),
+    (r'/api/appstore/add_app', AddAppHandler),
     (r'/api/account/reg_verify', AccountReg_verifyHandler),
     (r'/api/account/reg', AccountRegHandler),
     (r'/api/account/passwd_verify', AccountPasswd_verifyHandler),

@@ -69,11 +69,12 @@ class AccountLoginHandler(BaseHandler):
         log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
         mid = int(self.params.get('mid', 0))
         ts = int(self.params.get('ts', 0))
+        passwd_md5 = self.params.get('passwd', '')
         sign = self.params.get('sign', '')
         if not mid or not ts or not sign:
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
 
-        ret = yield account_service.login(mid, ts, sign)
+        ret = yield account_service.login(mid, passwd_md5)
         self.jsonify(ret)
 
 
@@ -83,4 +84,13 @@ class AccountLogoutHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
-        self.jsonify({'ret': 1, 'data': {'msg': 'hello'}})
+        mid = int(self.params.get('mid', 0))
+        ts = int(self.params.get('ts', 0))
+        passwd_md5 = self.params.get('passwd', '')
+        sign = self.params.get('sign', '')
+        if not mid or not ts or not sign:
+            self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+
+        ret = yield account_service.logout(mid, passwd_md5)
+        self.jsonify(ret)
+

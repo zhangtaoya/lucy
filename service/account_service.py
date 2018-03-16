@@ -11,12 +11,16 @@ from lib.db import *
 from config import config
 import log
 import md5
-import uuid
 import time
+import random
 import sys
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+
+TTL_VERIFY_CODE = 162
+TTL_NONCE = 7 * 24 * 3600
 
 @gen.coroutine
 def account_hello(phone):
@@ -24,6 +28,10 @@ def account_hello(phone):
 
 def phone_verifycode_cache_key(phone):
     return str(phone) + "_verify"
+
+
+def mid_nonce_cache_key(mid):
+    return str(mid) + "_nonce"
 
 
 def get_cached_verifycode(phone):
@@ -34,19 +42,29 @@ def get_cached_verifycode(phone):
 
 
 def get_md5(src):
+    src = str(src)
     m = md5.new()
     m.update(src)
     return m.hexdigest()
 
 
-def lucy_decry(key, passwd_encry):
-    return passwd_encry.replace(key, '')
+def lucy_decry(key, encry_txt):
+    return encry_txt.replace(key, '')
+
+
+def lucy_encry(key, txt):
+    return get_md5(key) + ',' + str(txt)
+
 
 
 def lucy_sign(key, txt):
     src = str(key) + ',' + txt
     return get_md5(src)
 
+
+def rand_str():
+    n = random.randint(0, 1E12)
+    return get_md5(n)
 
 @gen.coroutine
 def gen_mid():
@@ -146,7 +164,7 @@ def passwd_verify(phone):
     cache = get_redis()
     cache_key = phone_verifycode_cache_key(phone)
     cache.set(cache_key, verify_code)
-    cache.expire(cache_key, 162)
+    cache.expire(cache_key, TTL_VERIFY_CODE)
     raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
 
 
@@ -172,15 +190,49 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
 
 
 @gen.coroutine
-def account_service.login(mid, ts, sign_app):
+def login(mid, passwd_app_md5):
     col = get_col_account_member()
-    doc = yield motordb.mongo_find_one(col, {'mid': mid})
+    doc = yield motordb.mongo_find_one(col, {'_id': mid})
     if doc is False:
         log.error("db failed")
         raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
     if not doc:
         raise gen.Return({'ret': -1021, 'data': {'msg': "未查到该用户!"}})
-    
     passwd = doc.get('passwd')
-    sign_srv = lucy_sign(passwd, ','.join([str(mid), str(ts), str(1)]))
-    if sign_srv != sign_app:
+    if not passwd:
+        raise gen.Return({'ret': -1023, 'data': {'msg': "用户状态异常，请重置登陆密码!"}})
+
+    if get_md5(passwd) != passwd_app_md5:
+        raise gen.Return({'ret': -1024, 'data': {'msg': "密码错误!"}})
+        
+    nonce = rand_str()
+    key = mid_nonce_cache_key(mid)
+    cache = get_redis()
+    cache.set(key, nonce)
+    cache.expire(key, TTL_NONCE)
+
+    nonce_encry = lucy_encry(passwd, nonce)
+    raise gen.Return({'ret':1, 'data':{'nonce': nonce_encry}})
+
+
+@gen.coroutine
+def logout(mid, passwd_app_md5):
+    col = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col, {'_id': mid})
+    if doc is False:
+        log.error("db failed")
+        raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+    if not doc:
+        raise gen.Return({'ret': -1032, 'data': {'msg': "未查到该用户!"}})
+    passwd = doc.get('passwd')
+    if not passwd:
+        raise gen.Return({'ret': -1033, 'data': {'msg': "用户状态异常，请重置登陆密码!"}})
+
+    if get_md5(passwd) != passwd_app_md5:
+        raise gen.Return({'ret': -1034, 'data': {'msg': "退出成功！"}})
+ 
+    
+    key = mid_nonce_cache_key(mid)
+    cache = get_redis()
+    cache.delete(key)
+    raise gen.Return({'ret':1, 'data':{'msg': '退出成功！'}})
