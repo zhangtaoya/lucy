@@ -53,12 +53,12 @@ def lucy_decry(key, encry_txt):
 
 
 def lucy_encry(key, txt):
-    return get_md5(key) + ',' + str(txt)
+    return get_md5(key) + str(txt)
 
 
 
 def lucy_sign(key, txt):
-    src = str(key) + ',' + txt
+    src = str(key) + txt
     return get_md5(src)
 
 
@@ -95,7 +95,7 @@ def reg_verify(phone):
     doc = yield motordb.mongo_find_one(col, {'phone': phone})
     if doc is False:
         log.error("db failed")
-        raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+        raise gen.Return({'ret': -1, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
 
     if doc:
         raise gen.Return({'ret': -1002, 'data': {'msg': "此手机号已经注册"}})
@@ -118,21 +118,21 @@ def reg(phone, verify_code_app_md5, passwd_encry):
     col = get_col_account_member()
     doc = yield motordb.mongo_find_one(col, {'phone': phone})
     if doc:
-        raise gen.Return({'ret': -1012, 'data': {'msg': "该手机号已经注册!"}})
+        raise gen.Return({'ret': -1011, 'data': {'msg': "该手机号已经注册!"}})
 
     verify_code_srv = get_cached_verifycode(phone)
     if not verify_code_srv:
-        raise gen.Return({'ret':-1011, 'data': {'msg': '验证码已经过期，请重新获取验证码。'}})
+        raise gen.Return({'ret':-1012, 'data': {'msg': '验证码已经过期，请重新获取验证码。'}})
 
     verify_code_srv_md5 = get_md5(verify_code_srv)
     if verify_code_srv_md5 != verify_code_app_md5:
-        raise gen.Return({'ret':-1012, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
+        raise gen.Return({'ret':-1013, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
 
     passwd = lucy_decry(verify_code_srv, passwd_encry)
     mid = yield gen_mid()
     if not mid:
         log.error("gen mid failed")
-        raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+        raise gen.Return({'ret': -1, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
 
     ret = yield motordb.mongo_insert_one(col, {'_id': mid, 'phone': phone, 'passwd': passwd, 'ct': int(time.time())})
 
@@ -147,14 +147,14 @@ def passwd_verify(phone):
     doc = yield motordb.mongo_find_one(col, {'phone': phone})
     if doc is False:
         log.error("db failed")
-        raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+        raise gen.Return({'ret': -1, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
 
     if not doc:
-        raise gen.Return({'ret': -1002, 'data': {'msg': "此手机号未注册"}})
+        raise gen.Return({'ret': -1021, 'data': {'msg': "此手机号未注册"}})
 
     verify_key = get_cached_verifycode(phone)
     if verify_key:
-        raise gen.Return({'ret': -1003, 'data': {'msg': "此手机号已经获取了验证码，请稍后再获取吧"}})
+        raise gen.Return({'ret': -1022, 'data': {'msg': "此手机号已经获取了验证码，请稍后再获取吧"}})
 
     
 
@@ -172,17 +172,17 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     col = get_col_account_member()
     doc = yield motordb.mongo_find_one(col, {'phone': phone})
     if not doc:
-        raise gen.Return({'ret': -1021, 'data': {'msg': "未查到该用户!"}})
+        raise gen.Return({'ret': -1031, 'data': {'msg': "未查到该用户!"}})
 
     mid = doc['_id']
 
     verify_code_srv = get_cached_verifycode(phone)
     if not verify_code_srv:
-        raise gen.Return({'ret':-1023, 'data': {'msg': '验证码已经过期，请重新获取验证码。'}})
+        raise gen.Return({'ret':-1032, 'data': {'msg': '验证码已经过期，请重新获取验证码。'}})
 
     verify_code_srv_md5 = get_md5(verify_code_srv)
     if verify_code_srv_md5 != verify_code_app_md5:
-        raise gen.Return({'ret':-1024, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
+        raise gen.Return({'ret':-1033, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
 
     passwd = lucy_decry(verify_code_srv, passwd_encry)
     ret = yield motordb.mongo_update_one(col, {'phone': phone}, {'$set': {'passwd': passwd}})
@@ -196,15 +196,15 @@ def login(mid, passwd_app_md5):
     doc = yield motordb.mongo_find_one(col, {'_id': mid})
     if doc is False:
         log.error("db failed")
-        raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+        raise gen.Return({'ret': -1, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
     if not doc:
-        raise gen.Return({'ret': -1021, 'data': {'msg': "未查到该用户!"}})
+        raise gen.Return({'ret': -1041, 'data': {'msg': "未查到该用户!"}})
     passwd = doc.get('passwd')
     if not passwd:
-        raise gen.Return({'ret': -1023, 'data': {'msg': "用户状态异常，请重置登陆密码!"}})
+        raise gen.Return({'ret': -1042, 'data': {'msg': "用户状态异常，请重置登陆密码!"}})
 
     if get_md5(passwd) != passwd_app_md5:
-        raise gen.Return({'ret': -1024, 'data': {'msg': "密码错误!"}})
+        raise gen.Return({'ret': -1043, 'data': {'msg': "密码错误!"}})
         
     nonce = rand_str()
     key = mid_nonce_cache_key(mid)
@@ -222,15 +222,15 @@ def logout(mid, passwd_app_md5):
     doc = yield motordb.mongo_find_one(col, {'_id': mid})
     if doc is False:
         log.error("db failed")
-        raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+        raise gen.Return({'ret': -1, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
     if not doc:
-        raise gen.Return({'ret': -1032, 'data': {'msg': "未查到该用户!"}})
+        raise gen.Return({'ret': -1051, 'data': {'msg': "未查到该用户!"}})
     passwd = doc.get('passwd')
     if not passwd:
-        raise gen.Return({'ret': -1033, 'data': {'msg': "用户状态异常，请重置登陆密码!"}})
+        raise gen.Return({'ret': -1052, 'data': {'msg': "用户状态异常，请重置登陆密码!"}})
 
     if get_md5(passwd) != passwd_app_md5:
-        raise gen.Return({'ret': -1034, 'data': {'msg': "退出成功！"}})
+        raise gen.Return({'ret': -1053, 'data': {'msg': "退出成功！"}})
  
     
     key = mid_nonce_cache_key(mid)

@@ -88,7 +88,7 @@ def download(mid, appid, ver):
     if doc is False:
         raise gen.Return({'ret':-1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
     if not doc:
-        raise gen.Return({'ret':-2021, 'data': {'msg': '此app已经下架'}})
+        raise gen.Return({'ret':-2011, 'data': {'msg': '此app已经下架'}})
     yield motordb.mongo_update_one(col_info, {'_id': appid}, {'$inc': {'down_time': 1}})
     app_name = doc.get('name')
     url = doc.get('url')
@@ -100,14 +100,14 @@ def download(mid, appid, ver):
 
     ret = yield motordb.mongo_insert_one(col, {'mid': mid, 'appid': appid, 'ver': ver, 'name': app_name, 'url': url, 'ct': int(time.time())})
     if not ret:
-        raise gen.Return({'ret':-2022, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
+        raise gen.Return({'ret':-2012, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
 
     # charge
     ret_charge = 1
     if not ret_charge:
         ret = yield motordb.mongo_remove_one(col, {'mid': mid, 'appid': appid, 'ver': ver})
         if not ret:
-            raise gen.Return({'ret':-2003, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
+            raise gen.Return({'ret':-2013, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
         
     yield motordb.mongo_update_one(col_info, {'_id': appid}, {'$inc': {'down_user': 1}})
     raise gen.Return({'ret':1})
