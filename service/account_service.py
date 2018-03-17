@@ -19,7 +19,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-TTL_VERIFY_CODE = 162
+TTL_VERIFY_CODE = 182
 TTL_NONCE = 7 * 24 * 3600
 
 @gen.coroutine
@@ -110,7 +110,8 @@ def reg_verify(phone):
     cache_key = phone_verifycode_cache_key(phone)
     cache.set(cache_key, verify_code)
     cache.expire(cache_key, 162)
-    raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
+    raise gen.Return({'ret': 1})
+    #raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
 
 
 @gen.coroutine
@@ -164,7 +165,8 @@ def passwd_verify(phone):
     cache_key = phone_verifycode_cache_key(phone)
     cache.set(cache_key, verify_code)
     cache.expire(cache_key, TTL_VERIFY_CODE)
-    raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
+    #raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
+    raise gen.Return({'ret': 1})
 
 
 @gen.coroutine
