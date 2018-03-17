@@ -1,18 +1,18 @@
 import ujson
 from tornado import gen
 from base_handler import BaseHandler
-from service import appstore_service
+from service import app_service
 import log
 
 
-class AddAppHandler(BaseHandler):
+class AppAddHandler(BaseHandler):
     _label = 'AddAppHandler'
 
     @gen.coroutine
     def post(self):
         log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
         app = {
-        '_id': self.params.get('name', ''),
+        'name': self.params.get('name', ''),
         'ver': self.params.get('ver', ''),
         'desc': self.params.get('desc', ''),
         'icon': self.params.get('icon', ''),
@@ -27,5 +27,19 @@ class AddAppHandler(BaseHandler):
         'new_rank': int(self.params.get('new_rank', 0))
         }
 
-        ret = yield appstore_service.add_app(app)
+        ret = yield app_service.add(app)
         self.jsonify(ret)
+
+class AppViewHandler(BaseHandler):
+    _label = 'AddAppHandler'
+
+    @gen.coroutine
+    def post(self):
+        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        ts = int(self.params.get('ts', 0))
+        mid = int(self.params.get('mid', 0))
+        offset = int(self.params.get('offset', 0))
+        ty = self.params.get('type', '')
+        ret = yield app_service.view(mid, ty, offset)
+        self.jsonify(ret)
+ 

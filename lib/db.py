@@ -13,11 +13,11 @@ def get_redis(db=0):
 
 def get_col_account_member():
     return motordb.mongo_collection('account', 'member', config.DB_HOST, config.DB_PORT)
-
-
 def get_col_account_mid():
     return motordb.mongo_collection('account', 'mid', config.DB_HOST, config.DB_PORT)
 
 
 def get_col_app_info():
     return motordb.mongo_collection('app', 'info', config.DB_HOST, config.DB_PORT)
+def get_col_app_appid():
+    return motordb.mongo_collection('app', 'appid', config.DB_HOST, config.DB_PORT)
