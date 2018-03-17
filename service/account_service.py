@@ -174,7 +174,7 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     if not doc:
         raise gen.Return({'ret': -1021, 'data': {'msg': "未查到该用户!"}})
 
-    mid = doc['mid']
+    mid = doc['_id']
 
     verify_code_srv = get_cached_verifycode(phone)
     if not verify_code_srv:

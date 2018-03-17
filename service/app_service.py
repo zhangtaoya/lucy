@@ -90,14 +90,14 @@ def download(mid, appid, ver):
     if not doc:
         raise gen.Return({'ret':-2021, 'data': {'msg': '此app已经下架'}})
     yield motordb.mongo_update_one(col_info, {'_id': appid}, {'$inc': {'down_time': 1}})
+    app_name = doc.get('name')
+    url = doc.get('url')
 
     col = get_col_action_down_hist()
     doc = yield motordb.mongo_find_one(col, {'mid': mid, 'appid': appid, 'ver': ver})
     if doc:
         raise gen.Return({'ret':1, 'data':{'msg': '已经下载此版本'}})
 
-    app_name = doc.get('name')
-    url = doc.get('url')
     ret = yield motordb.mongo_insert_one(col, {'mid': mid, 'appid': appid, 'ver': ver, 'name': app_name, 'url': url, 'ct': int(time.time())})
     if not ret:
         raise gen.Return({'ret':-2022, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
