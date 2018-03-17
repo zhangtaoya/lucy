@@ -6,16 +6,6 @@ from service import my_service
 import log
 
 
-class HelloHandler(BaseHandler):
-    _label = 'HelloHandler'
-
-    @gen.coroutine
-    def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
-        ret = yield account_service.account_hello(1112)
-        self.jsonify(ret)
-
-
 class MyDownloadHistoryHandler(BaseHandler):
     _label = 'HelloHandler'
 
