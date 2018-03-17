@@ -33,6 +33,18 @@ class AccountRegHandler(BaseHandler):
             return
 
         ret = yield account_service.reg(phone, verify_code_md5, passwd_encry)
+        if ret.get('ret') != 1:
+            self.jsonify(ret)
+            return
+
+        # login
+        mid = ret.get('data').get('mid')
+        passwd_md5 = ret.get('data').get('passwd')
+        ret = yield account_service.login(mid, passwd_md5)
+        if ret.get('ret') != 1:
+            self.jsonify(ret)
+            return
+        ret['data']['mid'] = mid
         self.jsonify(ret)
 
 class AccountPasswd_verifyHandler(BaseHandler):
@@ -60,6 +72,18 @@ class AccountPasswdHandler(BaseHandler):
             return
 
         ret = yield account_service.passwd(phone, verify_code_md5, passwd_encry)
+        if ret.get('ret') != 1:
+            self.jsonify(ret)
+            return
+
+        # login
+        mid = ret.get('data').get('mid')
+        passwd_md5 = ret.get('data').get('passwd')
+        ret = yield account_service.login(mid, passwd_md5)
+        if ret.get('ret') != 1:
+            self.jsonify(ret)
+            return
+
         self.jsonify(ret)
 
 

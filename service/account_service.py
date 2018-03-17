@@ -136,7 +136,7 @@ def reg(phone, verify_code_app_md5, passwd_encry):
 
     ret = yield motordb.mongo_insert_one(col, {'_id': mid, 'phone': phone, 'passwd': passwd, 'ct': int(time.time())})
 
-    raise gen.Return({'ret':1, 'data': {'mid': mid}})
+    raise gen.Return({'ret':1, 'data': {'mid': mid, 'passwd': get_md5(passwd)}})
 
 
 @gen.coroutine
@@ -174,6 +174,8 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     if not doc:
         raise gen.Return({'ret': -1021, 'data': {'msg': "未查到该用户!"}})
 
+    mid = doc['mid']
+
     verify_code_srv = get_cached_verifycode(phone)
     if not verify_code_srv:
         raise gen.Return({'ret':-1023, 'data': {'msg': '验证码已经过期，请重新获取验证码。'}})
@@ -185,7 +187,7 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     passwd = lucy_decry(verify_code_srv, passwd_encry)
     ret = yield motordb.mongo_update_one(col, {'phone': phone}, {'$set': {'passwd': passwd}})
 
-    raise gen.Return({'ret':1})
+    raise gen.Return({'ret':1, 'data':{'mid': mid, 'passwd': get_md5(passwd)}})
 
 
 @gen.coroutine
