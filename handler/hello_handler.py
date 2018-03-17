@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import ujson
 from tornado import gen
 from base_handler import BaseHandler

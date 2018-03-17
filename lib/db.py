@@ -21,3 +21,7 @@ def get_col_app_info():
     return motordb.mongo_collection('app', 'info', config.DB_HOST, config.DB_PORT)
 def get_col_app_appid():
     return motordb.mongo_collection('app', 'appid', config.DB_HOST, config.DB_PORT)
+
+
+def get_col_action_down_hist():
+    return motordb.mongo_collection('action', 'down_hist', config.DB_HOST, config.DB_PORT)

@@ -30,6 +30,7 @@ class AccountRegHandler(BaseHandler):
         passwd_encry = self.params.get('passwd', '')
         if not phone or not verify_code_md5 or not passwd_encry:
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+            return
 
         ret = yield account_service.reg(phone, verify_code_md5, passwd_encry)
         self.jsonify(ret)
@@ -56,6 +57,7 @@ class AccountPasswdHandler(BaseHandler):
         passwd_encry = self.params.get('passwd', '')
         if not phone or not verify_code_md5 or not passwd_encry:
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+            return
 
         ret = yield account_service.passwd(phone, verify_code_md5, passwd_encry)
         self.jsonify(ret)
@@ -73,6 +75,7 @@ class AccountLoginHandler(BaseHandler):
         sign = self.params.get('sign', '')
         if not mid or not ts or not sign:
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+            return
 
         ret = yield account_service.login(mid, passwd_md5)
         self.jsonify(ret)
@@ -90,6 +93,7 @@ class AccountLogoutHandler(BaseHandler):
         sign = self.params.get('sign', '')
         if not mid or not ts or not sign:
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+            return
 
         ret = yield account_service.logout(mid, passwd_md5)
         self.jsonify(ret)

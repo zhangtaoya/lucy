@@ -1,6 +1,7 @@
 from handler.hello_handler import *
 from handler.account_handler import *
 from handler.app_handler import *
+from handler.my_handler import *
 routes = [
     (r'/api/hello', HelloHandler),
     (r'/api/account/reg_verify', AccountReg_verifyHandler),
@@ -12,5 +13,8 @@ routes = [
 
     (r'/api/app/add', AppAddHandler),
     (r'/api/app/view', AppViewHandler),
+    (r'/api/app/download', AppDownloadHandler),
+
+    (r'/api/my/download_history', MyDownloadHistoryHandler),
 
 ]

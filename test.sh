@@ -98,3 +98,8 @@ echo ""
 
 curl -d '{"mid":1,"type":"rec_rank","offset":10, "ts":12123121}' $srv/api/app/view
 echo ""
+
+curl -d '{"mid":1, "appid":19, "ver":"1.0.1"}' $srv/api/app/download
+echo ""
+
+curl -d '{"mid":1, "offset":0}' $srv/api/my/download_history

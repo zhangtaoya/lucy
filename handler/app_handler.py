@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import ujson
 from tornado import gen
 from base_handler import BaseHandler
@@ -30,6 +31,7 @@ class AppAddHandler(BaseHandler):
         ret = yield app_service.add(app)
         self.jsonify(ret)
 
+
 class AppViewHandler(BaseHandler):
     _label = 'AddAppHandler'
 
@@ -41,5 +43,22 @@ class AppViewHandler(BaseHandler):
         offset = int(self.params.get('offset', 0))
         ty = self.params.get('type', '')
         ret = yield app_service.view(mid, ty, offset)
+        self.jsonify(ret)
+
+
+class AppDownloadHandler(BaseHandler):
+    _label = 'AddAppHandler'
+
+    @gen.coroutine
+    def post(self):
+        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        mid = int(self.params.get('mid', 0))
+        appid = int(self.params.get('appid', 0))
+        ver = self.params.get('ver', '')
+        if not mid or not appid or not ver:
+            self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+            return
+            
+        ret = yield app_service.download(mid, appid, ver)
         self.jsonify(ret)
  

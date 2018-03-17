@@ -118,7 +118,6 @@ def reg(phone, verify_code_app_md5, passwd_encry):
     col = get_col_account_member()
     doc = yield motordb.mongo_find_one(col, {'phone': phone})
     if doc:
-        log.error("db failed")
         raise gen.Return({'ret': -1012, 'data': {'msg': "该手机号已经注册!"}})
 
     verify_code_srv = get_cached_verifycode(phone)
@@ -135,7 +134,7 @@ def reg(phone, verify_code_app_md5, passwd_encry):
         log.error("gen mid failed")
         raise gen.Return({'ret': -1001, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
 
-    ret = yield motordb.mongo_insert_one(col, {'_id': mid, 'phone': phone, 'passwd': passwd})
+    ret = yield motordb.mongo_insert_one(col, {'_id': mid, 'phone': phone, 'passwd': passwd, 'ct': int(time.time())})
 
     raise gen.Return({'ret':1, 'data': {'mid': mid}})
 
