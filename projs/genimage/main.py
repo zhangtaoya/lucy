@@ -3,6 +3,7 @@
 
 import os.path
 import time
+import StringIO
 from PIL import Image,ImageDraw,ImageFont
 
 import tornado.httpserver
@@ -70,8 +71,10 @@ def draw_lsj_img(file_name, day_comment, title, cont):
         draw.text((55,387 + hi),cont, fill=(0,0,0),font=font_cont)
         hi += 50
 
-    im.save("xx_lsj.jpg")
-    return
+    sio = StringIO.StringIO()
+    im.save(sio, 'jpeg')
+    sio.seek(0)
+    return sio.read()
 
 class LSJHandler(tornado.web.RequestHandler):
     def post(self):
@@ -79,8 +82,7 @@ class LSJHandler(tornado.web.RequestHandler):
         title = self.get_argument("title")
         cont = self.get_argument("cont")
         #self.render("user.html",username=user_name,email=user_email,website=user_website,language=user_language)
-        draw_lsj_img("LSJ.jpg", day_comment, title, cont)
-        data = open('xx_lsj.jpg').read()
+        data = draw_lsj_img("LSJ.jpg", day_comment, title, cont)
         self.write(data)
         self.set_header("Content-type", "image/jpg")
     def get(self):
@@ -111,9 +113,10 @@ def draw_pai_img(file_name, day_comment, title, cont):
     for cont in cont_arr:
         draw.text((x0,h0 + hi),cont, fill=(0,0,0),font=font_cont)
         hi += dh
-
-    im.save("xx_pai.jpg")
-    return
+    sio = StringIO.StringIO()
+    im.save(sio, 'jpeg')
+    sio.seek(0)
+    return sio.read()
 
 
 class PAIHandler(tornado.web.RequestHandler):
@@ -122,8 +125,7 @@ class PAIHandler(tornado.web.RequestHandler):
         title = self.get_argument("title")
         cont = self.get_argument("cont")
         #self.render("user.html",username=user_name,email=user_email,website=user_website,language=user_language)
-        draw_pai_img("PAI.jpg", day_comment, title, cont)
-        data = open('xx_pai.jpg').read()
+        data = draw_pai_img("PAI.jpg", day_comment, title, cont)
         self.write(data)
         self.set_header("Content-type", "image/jpg")
     def get(self):
