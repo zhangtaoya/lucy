@@ -41,6 +41,38 @@ class TestHandler(tornado.web.RequestHandler):
         self.write(data)
         self.set_header("Content-type", "image/jpg")
 
+def auto_align(cont, n_c):
+    cont_strip = cont.strip().replace('\r', '\n').replace('\n\n', '\n')
+    cont_arr = cont_strip.split('\n')
+    #return cont_arr
+    cont_arr = []
+
+    n_ch = 0
+    str_i = ''
+    for c in cont_strip:
+        if c == '\n':
+            cont_arr.append(str_i)
+            str_i = ''
+            n_ch = 0
+            continue
+
+        str_i += c
+        if 'A' <= c <= 'Z':
+            n_ch += 1/1.3
+        elif '!' <= c <= '~':
+            n_ch += 1/2.1
+        else:
+            n_ch += 1
+        if n_ch >= n_c:
+            cont_arr.append(str_i)
+            str_i = ''
+            n_ch = n_en = 0
+
+    if str_i:
+        cont_arr.append(str_i)
+
+    return cont_arr
+
 def get_date_desc():
     # time.struct_time(tm_year=2018, tm_mon=4, tm_mday=1, tm_hour=20, tm_min=14, tm_sec=22, tm_wday=6, tm_yday=91, tm_isdst=0)
     to = time.localtime(time.time())
@@ -65,8 +97,8 @@ def draw_lsj_img(file_name, day_comment, title, cont):
     draw = ImageDraw.Draw(im)
     str_day = get_date_desc() + " " + day_comment
     draw.text((80,335),str_day, fill=(100,100,100),font=font_day_comment)
-
-    title_arr = title.strip().replace('\r', '\n').replace('\n\n', '\n').split('\n')
+    n_align = 22
+    title_arr = auto_align(title, n_align)
     hi = 0
     for title in title_arr:
         draw.text((55,387 + hi),title, fill=(0,0,0),font=font_title)
@@ -74,7 +106,7 @@ def draw_lsj_img(file_name, day_comment, title, cont):
         draw.text((55,387 + hi),title, fill=(0,0,0),font=font_title)
         hi += 50
 
-    cont_arr = cont.strip().replace('\r', '\n').replace('\n\n', '\n').split('\n')
+    cont_arr = auto_align(cont, n_align)
     hi = 0
     for cont in cont_arr:
         draw.text((55,387 + hi),cont, fill=(40,40,40),font=font_cont)
