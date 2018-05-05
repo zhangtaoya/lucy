@@ -129,7 +129,7 @@ class LSJHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
-def draw_pai_img(file_name, day_comment, title, cont):
+def draw_oldpai_img(file_name, day_comment, title, cont):
     font_title=font_cont=font_day_comment = ImageFont.truetype("SourceHanSansCN-Regular.ttf",35)
     #font_title = ImageFont.truetype("chuti.ttf",38)
     #font_cont = ImageFont.truetype("putong.ttf",38)
@@ -160,6 +160,52 @@ def draw_pai_img(file_name, day_comment, title, cont):
     return sio.read()
 
 
+
+def draw_pai_img(file_name, day_comment, title, cont):
+    font_title=font_cont=font_day_comment = ImageFont.truetype("SourceHanSansCN-Regular.ttf",35)
+    #font_title = ImageFont.truetype("chuti.ttf",38)
+    #font_cont = ImageFont.truetype("putong.ttf",38)
+    im = Image.open(file_name)
+    draw = ImageDraw.Draw(im)
+    str_day = get_date_desc() + " " + day_comment
+    draw.text((143,490),str_day, fill=(100,100,100),font=font_day_comment)
+
+    title_arr = title.strip().replace('\r', '\n').replace('\n\n', '\n').split('\n')
+    hi = 0
+    dh = 65
+    h0 = 587
+    x0 = 65
+    for title in title_arr:
+        draw.text((x0, h0 + hi),title, fill=(0,0,0),font=font_title)
+        draw.text((x0, h0 + hi),title, fill=(0,0,0),font=font_title)
+        draw.text((x0, h0 + hi),title, fill=(0,0,0),font=font_title)
+        hi += dh
+
+    cont_strip = cont.strip().replace('\r', '\n').replace('\n\n', '\n').split('\n')
+    cont_arr = auto_align(cont_strip, 20)
+    hi = 0
+    for cont in cont_arr:
+        draw.text((x0,h0 + hi),cont, fill=(0,0,0),font=font_cont)
+        hi += dh
+    sio = StringIO.StringIO()
+    im.save(sio, 'jpeg')
+    sio.seek(0)
+    return sio.read()
+
+
+class PAIOLDHandler(tornado.web.RequestHandler):
+    def post(self):
+        day_comment = self.get_argument("day_comment")
+        title = self.get_argument("title")
+        cont = self.get_argument("cont")
+        #self.render("user.html",username=user_name,email=user_email,website=user_website,language=user_language)
+        data = draw_oldpai_img("PAI.jpg", day_comment, title, cont)
+        self.write(data)
+        self.set_header("Content-type", "image/jpg")
+    def get(self):
+        self.render("index_pai.html")
+
+
 class PAIHandler(tornado.web.RequestHandler):
     def post(self):
         day_comment = self.get_argument("day_comment")
@@ -171,6 +217,7 @@ class PAIHandler(tornado.web.RequestHandler):
         self.set_header("Content-type", "image/jpg")
     def get(self):
         self.render("index_pai.html")
+
 
 def draw_baic_img(file_name, day_comment, title, cont):
     font_day_comment = ImageFont.truetype("SourceHanSansCN-Regular.ttf",30)
@@ -260,6 +307,7 @@ handlers = [
     (r"/user", UserHandler),
     (r"/t", TestHandler),
     (r"/lsj", LSJHandler),
+    (r"/pai_old", PAIOLDHandler),
     (r"/pai", PAIHandler),
     (r"/baic", BAICHandler),
 ]
