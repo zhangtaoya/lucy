@@ -170,7 +170,9 @@ def draw_pai_img(file_name, day_comment, title, cont):
     str_day = get_date_desc() + " " + day_comment
     draw.text((143,490),str_day, fill=(100,100,100),font=font_day_comment)
 
+    n_align = 26
     title_arr = title.strip().replace('\r', '\n').replace('\n\n', '\n').split('\n')
+    title_arr = auto_align(title, n_align)
     hi = 0
     dh = 65
     h0 = 587
@@ -183,7 +185,7 @@ def draw_pai_img(file_name, day_comment, title, cont):
 
     cont_strip = cont.strip().replace('\r', '\n').replace('\n\n', '\n')
     # cont_arr = cont_strip.split('\n')
-    cont_arr = auto_align(cont_strip, 26)
+    cont_arr = auto_align(cont, n_align)
     hi = 0
     for cont in cont_arr:
         draw.text((x0,h0 + hi),cont, fill=(0,0,0),font=font_cont)
