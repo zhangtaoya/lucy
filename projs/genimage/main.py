@@ -183,7 +183,7 @@ def draw_pai_img(file_name, day_comment, title, cont):
 
     cont_strip = cont.strip().replace('\r', '\n').replace('\n\n', '\n')
     # cont_arr = cont_strip.split('\n')
-    cont_arr = auto_align(cont_strip, 25)
+    cont_arr = auto_align(cont_strip, 27)
     hi = 0
     for cont in cont_arr:
         draw.text((x0,h0 + hi),cont, fill=(0,0,0),font=font_cont)
