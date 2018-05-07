@@ -25,3 +25,16 @@ def get_col_app_appid():
 
 def get_col_action_down_hist():
     return motordb.mongo_collection('action', 'down_hist', config.DB_HOST, config.DB_PORT)
+
+
+def get_col_mine_mine():
+    return motordb.mongo_collection('mine', 'mine', config.DB_MINE_HOST, config.DB_MINE_PORT)
+
+def get_col_mine_produce():
+    return motordb.mongo_collection('mine', 'produce', config.DB_MINE_HOST, config.DB_MINE_PORT)
+
+def get_col_mine_power_history():
+    return motordb.mongo_collection('mine', 'power_history', config.DB_MINE_HOST, config.DB_MINE_PORT)
+
+def get_col_mine_balance_history():
+    return motordb.mongo_collection('mine', 'balance_history', config.DB_MINE_HOST, config.DB_MINE_PORT)
