@@ -9,6 +9,7 @@ routes = [
     (r'/api/account/passwd_verify', AccountPasswd_verifyHandler),
     (r'/api/account/passwd', AccountPasswdHandler),
     (r'/api/account/login', AccountLoginHandler),
+    (r'/api/account/login_phone', AccountLoginPhoneHandler),
     (r'/api/account/logout', AccountLogoutHandler),
 
     (r'/api/app/add', AppAddHandler),

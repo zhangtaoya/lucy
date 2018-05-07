@@ -191,6 +191,21 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
 
     raise gen.Return({'ret':1, 'data':{'mid': mid, 'passwd': get_md5(passwd)}})
 
+@gen.coroutine
+def login_phone(phone, passwd_app_md5):
+    if str(phone).isdigit() is False:
+        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码格式不对'}})
+
+    phone = int(phone)
+    col = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col, {'phone': phone})
+    if not doc:
+        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码未注册'}})
+
+    mid = int(doc['_id'])
+    ret = yield login(mid, passwd_app_md5)
+    raise gen.Return(ret)
+    
 
 @gen.coroutine
 def login(mid, passwd_app_md5):
