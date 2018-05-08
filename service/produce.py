@@ -33,29 +33,22 @@ PR_STATUS_MINE_LOST = 2
 def start_mine(mid):
     mid = int(mid)
 
-    # S1. check whether already started
-    col_produce = get_col_mine_produce()
-    doc = yield motordb.mongo_find_one(col_produce, {'_id': mid})
-    if doc is False:
-        log.error('produce.start_mine@query col_produce, mid:%s' % mid)
-        raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
-    if doc:
-        t_ripe = int(doc.get('t_ripe', 0))
-        t_left = int(time.time()) - t_ripe
-        if t_left > PR_HOUR_FOR_RIPE * 3600 or t_left < 0:
-            t_left = PR_HOUR_FOR_RIPE * 3600
-
-        raise gen.Return({'ret': -1, 'data': {'msg': '正在挖矿中...', 'status': PR_STATUS_MINING, 't_left': t_left}})
-
-    # S2. get power
     col_mine = get_col_mine_mine()
     doc = yield motordb.mongo_find_one(col_mine, {'_id': mid})
+
+    # S1. check whether already started
     if doc is False:
-        log.error('produce.start_mine@query col_mine, mid:%s' % mid)
+        log.error('produce.start_mine@query col_produce, mid:%s' % mid)
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
     if not doc:
         log.warn('produce.start_mine@not reg, mid:%s' % mid)
         raise gen.Return({'ret': -1, 'data': {'msg': '您还未注册~'}})
+
+    produce = doc.get('produce')
+    if produce:
+        raise gen.Return({'ret': -1, 'data': {'msg': '正在挖矿中...'}})
+
+    # S2. get power
     power = doc.get('power', 0)
 
     # S3. calc val, t_ripe, t_end
@@ -64,7 +57,13 @@ def start_mine(mid):
     t_end = int(time.time()) + (PR_HOUR_FOR_RIPE + PR_HOUR_FOR_LOST) * 3600
 
     # S4. insert record into produce
-    ret = yield motordb.mongo_insert_one(col_produce, {'_id': mid, 'val': val, 't_ripe': t_ripe, 't_end': t_end})
+    ret = yield motordb.mongo_update_one(col_mine,
+                                         {'_id': mid},
+                                         {'$set': {'produce': {'val': val,
+                                                               't_ripe': t_ripe,
+                                                               't_end': t_end}
+                                                   }
+                                          })
     if not ret:
         log.error('produce.start_mine@insert col_produce, mid:%s' % mid)
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
@@ -73,31 +72,37 @@ def start_mine(mid):
              (mid, power, val, t_ripe, t_end))
 
     # todo actionlog
-    raise gen.Return({'ret': 1, 'data': {'coin': val, 't_ripe': PR_HOUR_FOR_RIPE * 3600}})
+    raise gen.Return({'ret': 1, 'data': {'coin': val, 'status': PR_STATUS_MINING, 't_left': PR_HOUR_FOR_RIPE * 3600}})
 
 
 @gen.coroutine
 def collect_coin(mid):
     mid = int(mid)
-
-    # S1. check whether already started
-    col_produce = get_col_mine_produce()
-    doc = yield motordb.mongo_find_one(col_produce, {'_id': mid})
+    col_mine = get_col_mine_mine()
+    doc = yield motordb.mongo_find_one(col_mine, {'_id': mid})
+    # S0. check whether registered
     if doc is False:
         log.error('produce.collect_coin@query col_produce, mid:%s' % mid)
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
     if not doc:
+        log.warn('produce.collect_coin@not reg, mid:%s' % mid)
+        raise gen.Return({'ret': -1, 'data': {'msg': '您还未注册~'}})
+
+    produce = doc.get('produce')
+    # S1. check whether already started
+    if not produce:
         raise gen.Return({'ret': -1, 'data': {'msg': '还未开始挖矿'}})
 
     # S2. check whether expired
     t_now = int(time.time())
-    t_end = doc.get('t_end', 0)
+    t_end = produce.get('t_end', 0)
     if t_now > t_end:
-        yield motordb.mongo_delete_one(col_produce, {'_id': mid})
+        yield motordb.mongo_update_one(col_mine, {'_id': mid}, {'$unset': {'produce': 1}})
+        log.info('produce.collect_coin@mid:%s coin loss, detail:%s' % (mid, ujson.dumps(produce)))
         raise gen.Return({'ret': -1, 'data': {'msg': '您的矿已流失', 'status': PR_STATUS_MINE_LOST}})
 
     # S3. check whether ripe
-    t_ripe = doc.get('t_ripe', 0)
+    t_ripe = produce.get('t_ripe', 0)
     if t_now < t_ripe:
         t_left = int(time.time()) - t_ripe
         if t_left > PR_HOUR_FOR_RIPE * 3600 or t_left < 0:
@@ -105,11 +110,11 @@ def collect_coin(mid):
         raise gen.Return({'ret': -1, 'data': {'msg': '正在挖矿中...', 'status': PR_STATUS_MINING, 't_left': t_left}})
 
     # S4. get the riped coin, and delete the record
-    val = doc.get('val', 0)
-    ret = yield motordb.mongo_delete_one(col_produce, {'_id': mid})
+    val = produce.get('val', 0)
+    ret = yield motordb.mongo_update_one(col_mine, {'_id': mid}, {'$unset': {'produce': 1}})
     if not ret:
         log.error('produce.collect_coin@delete ripe recode col_produce, mid:%s, val:%s' % (mid, val))
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
 
-    log.info('produce.collect_coin@succeed. for rec:' % ujson.dumps(doc, ensure_ascii=False))
+    log.info('produce.collect_coin@succeed. for mid:%s, produce:%s' % (mid, ujson.dumps(produce, ensure_ascii=False)))
     raise gen.Return({'ret': 1, 'data': {'coin': val}})
