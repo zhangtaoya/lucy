@@ -130,7 +130,12 @@ class AccountLoginPhoneHandler(BaseHandler):
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
             return
 
-        ret = yield account_service.login_phone(phone, passwd_md5)
+        ret = yield account_service.get_mid_by_phone(phone)
+        if ret.get('ret') != 1:
+            self.jsonify(ret)
+            return
+
+        ret = yield account_service.login(ret['data']['mid'], passwd_md5)
         self.jsonify(ret)
 
 

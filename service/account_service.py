@@ -22,9 +22,11 @@ sys.setdefaultencoding('utf-8')
 TTL_VERIFY_CODE = 182
 TTL_NONCE = 7 * 24 * 3600
 
+
 @gen.coroutine
 def account_hello(phone):
     raise gen.Return({'ret':1, 'ph': phone})
+
 
 def phone_verifycode_cache_key(phone):
     return str(phone) + "_verify"
@@ -56,7 +58,6 @@ def lucy_encry(key, txt):
     return get_md5(key) + str(txt)
 
 
-
 def lucy_sign(key, txt):
     src = str(key) + txt
     return get_md5(src)
@@ -65,6 +66,7 @@ def lucy_sign(key, txt):
 def rand_str():
     n = random.randint(0, 1E12)
     return get_md5(n)
+
 
 @gen.coroutine
 def gen_mid():
@@ -190,21 +192,6 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     ret = yield motordb.mongo_update_one(col, {'phone': phone}, {'$set': {'passwd': passwd}})
 
     raise gen.Return({'ret':1, 'data':{'mid': mid, 'passwd': get_md5(passwd)}})
-
-@gen.coroutine
-def login_phone(phone, passwd_app_md5):
-    if str(phone).isdigit() is False:
-        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码格式不对'}})
-
-    phone = int(phone)
-    col = get_col_account_member()
-    doc = yield motordb.mongo_find_one(col, {'phone': phone})
-    if not doc:
-        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码未注册'}})
-
-    mid = int(doc['_id'])
-    ret = yield login(mid, passwd_app_md5)
-    raise gen.Return(ret)
     
 
 @gen.coroutine
@@ -254,3 +241,19 @@ def logout(mid, passwd_app_md5):
     cache = get_redis()
     cache.delete(key)
     raise gen.Return({'ret':1, 'data':{'msg': '退出成功！'}})
+
+
+@gen.coroutine
+def get_mid_by_phone(phone):
+    if str(phone).isdigit() is False:
+        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码格式不对'}})
+
+    phone = int(phone)
+    col = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col, {'phone': phone})
+    if not doc:
+        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码未注册'}})
+
+    mid = int(doc['_id'])
+    raise gen.Return({'ret': 1, 'data': {'mid': mid}})
+
