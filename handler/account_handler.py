@@ -5,6 +5,7 @@ from base_handler import BaseHandler
 import log
 
 from service import account_service
+from service import mine_service
 
 
 class AccountReg_verifyHandler(BaseHandler):
@@ -52,6 +53,8 @@ class AccountRegHandler(BaseHandler):
             self.jsonify(ret)
             return
         ret['data']['mid'] = mid
+
+        mine_service.reg_bonus(mid)
         self.jsonify(ret)
 
 class AccountPasswd_verifyHandler(BaseHandler):
@@ -109,6 +112,7 @@ class AccountLoginHandler(BaseHandler):
             return
 
         ret = yield account_service.login(mid, passwd_md5)
+        mine_service.login_bonus(mid)
         self.jsonify(ret)
 
 

@@ -69,7 +69,7 @@ def change(mid, val, ty, desc):
     if not valid:
         raise gen.Return({'ret': -1})
 
-    # add into mine.power
+    # add into mine.balance
     tnow = int(time.time())
     col_mine = get_col_mine_mine()
     doc = yield motordb.mongo_find_one_and_update(col_mine, {'_id': mid}, {'$inc': {'balance': val}, '$set': {'ut': tnow}})

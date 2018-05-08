@@ -30,7 +30,7 @@ VAL_COIN_REG = 10
 
 
 @gen.coroutine
-def reg(mid):
+def reg_bonus(mid):
     # add power
     yield power.change(mid, power.PW_TYPE_REG, VAL_PWER_REG, "新用户算力值增加")
     # add balance
@@ -39,7 +39,7 @@ def reg(mid):
 
 
 @gen.coroutine
-def login(mid):
+def login_bonus(mid):
     # add power
     ret = yield power.change(mid, power.PW_TYPE_LOGIN, VAL_PWER_LOGIN, "登陆算力值增加")
     raise gen.Return(ret)
@@ -66,3 +66,24 @@ def collect_coin(mid):
         log.error(str(mid) + "@mine.collect_coin@need rollback@produce ret:" + ujson.dumps(ret, ensure_ascii=False) +
                   ", failed upon balance change, ret:" + ujson.dumps(ret, ensure_ascii=False))
     raise gen.Return(ret)
+
+
+@gen.coroutine
+def info(mid):
+    mid = int(mid)
+    col_mine = get_col_mine_mine()
+    doc = yield motordb.mongo_find_one(col_mine, {'_id': mid})
+    if doc is False:
+        log.error('mine.info@query col_produce, mid:%s' % mid)
+        raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
+    if not doc:
+        log.warn('mine.info@not reg, mid:%s' % mid)
+        raise gen.Return({'ret': -1, 'data': {'msg': '您还未注册~'}})
+
+    produce_info = doc.get('produce')
+    if produce_info:
+        t_ripe = produce_info['t_ripe']
+        t_left = t_ripe - int(time.time())
+        produce_info['t_left'] = t_left
+    del doc['_id']
+    raise gen.Return({'ret': 1, 'data': doc})
