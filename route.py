@@ -2,6 +2,7 @@ from handler.hello_handler import *
 from handler.account_handler import *
 from handler.app_handler import *
 from handler.my_handler import *
+from handler.mine_handler import *
 routes = [
     (r'/api/hello', HelloHandler),
     (r'/api/account/reg_verify', AccountReg_verifyHandler),
@@ -17,5 +18,9 @@ routes = [
     (r'/api/app/download', AppDownloadHandler),
 
     (r'/api/my/download_history', MyDownloadHistoryHandler),
+
+    (r'/api/mine/info', MineInfoHandler),
+    (r'/api/mine/start', MineStartHandler),
+    (r'/api/mine/collect', MineCollectHandler),
 
 ]

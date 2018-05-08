@@ -6,7 +6,7 @@ from service import mine_service
 import log
 
 
-class MineInfoHistoryHandler(BaseHandler):
+class MineInfoHandler(BaseHandler):
     _label = 'HelloHandler'
 
     @gen.coroutine
@@ -17,7 +17,7 @@ class MineInfoHistoryHandler(BaseHandler):
         self.jsonify(ret)
 
 
-class MineStartHistoryHandler(BaseHandler):
+class MineStartHandler(BaseHandler):
     _label = 'HelloHandler'
 
     @gen.coroutine
@@ -28,7 +28,7 @@ class MineStartHistoryHandler(BaseHandler):
         self.jsonify(ret)
 
 
-class MineCollectHistoryHandler(BaseHandler):
+class MineCollectHandler(BaseHandler):
     _label = 'HelloHandler'
 
     @gen.coroutine
