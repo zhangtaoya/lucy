@@ -7,7 +7,7 @@ import log
 
 
 class MineInfoHandler(BaseHandler):
-    _label = 'HelloHandler'
+    _label = 'MineInfoHandler'
 
     @gen.coroutine
     def post(self):
@@ -18,7 +18,7 @@ class MineInfoHandler(BaseHandler):
 
 
 class MineStartHandler(BaseHandler):
-    _label = 'HelloHandler'
+    _label = 'MineStartHandler'
 
     @gen.coroutine
     def post(self):
@@ -29,7 +29,7 @@ class MineStartHandler(BaseHandler):
 
 
 class MineCollectHandler(BaseHandler):
-    _label = 'HelloHandler'
+    _label = 'MineCollectHandler'
 
     @gen.coroutine
     def post(self):

@@ -26,7 +26,6 @@ class AccountReg_verifyHandler(BaseHandler):
         self.jsonify(ret)
 
 
-
 class AccountRegHandler(BaseHandler):
     _label = 'HelloHandler'
 
@@ -56,6 +55,7 @@ class AccountRegHandler(BaseHandler):
 
         mine_service.reg_bonus(mid)
         self.jsonify(ret)
+
 
 class AccountPasswd_verifyHandler(BaseHandler):
     _label = 'HelloHandler'
@@ -137,7 +137,6 @@ class AccountLoginPhoneHandler(BaseHandler):
 
         ret = yield account_service.login(ret['data']['mid'], passwd_md5)
         self.jsonify(ret)
-
 
 
 class AccountLogoutHandler(BaseHandler):
