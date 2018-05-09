@@ -43,7 +43,7 @@ def add_change_hist(mid, ty, val, desc):
         if not ret:
             raise gen.Return(False)
 
-    if ty == BL_TYPE_LOGIN:
+    elif ty == BL_TYPE_LOGIN:
         # check whether login today
         today = int(time.strftime("%Y%m%d", time.localtime(time.time())))
         doc = yield motordb.mongo_find_one(col_hist, {'mid': mid, 'type': ty, 'day': today})
@@ -53,14 +53,15 @@ def add_change_hist(mid, ty, val, desc):
             log.error("balance.add_change_hist@db error@check whether login today:" + para)
             raise gen.Return(False)
 
-    if ty != BL_TYPE_MINE:
+    elif ty != BL_TYPE_MINE:
         log.error("balance.add_change_hist@unrecognized change: " + para)
         raise gen.Return(False)
+
     raise gen.Return(True)
 
 
 @gen.coroutine
-def change(mid, val, ty, desc):
+def change(mid, ty, val, desc):
     mid = int(mid)
     ty = int(ty)
     val = float(val)
@@ -72,7 +73,8 @@ def change(mid, val, ty, desc):
     # add into mine.balance
     tnow = int(time.time())
     col_mine = get_col_mine_mine()
-    doc = yield motordb.mongo_find_one_and_update(col_mine, {'_id': mid}, {'$inc': {'balance': val}, '$set': {'ut': tnow}})
+    # insert if not exists
+    doc = yield motordb.mongo_find_one_and_update(col_mine, {'_id': mid}, {'$inc': {'balance': val}, '$set': {'ut': tnow}}, upsert=True)
     if not doc:
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
 

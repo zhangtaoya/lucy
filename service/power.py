@@ -32,6 +32,8 @@ PW_TYPE_LOGIN = 2
 def add_change_hist(mid, ty, val, desc):
     col_hist = get_col_mine_power_history()
     tnow = int(time.time())
+    today = int(time.strftime("%Y%m%d", time.localtime(time.time())))
+    # todo: high level concorrency attack
     if ty == PW_TYPE_REG:
         # check whether already registered
         doc = yield motordb.mongo_find_one(col_hist, {'mid': mid, 'type': ty})
@@ -43,19 +45,26 @@ def add_change_hist(mid, ty, val, desc):
             log.error("power.add_change_hist@db error@check whether already registered")
             raise gen.Return(False)
 
-        ret = yield motordb.mongo_insert_one(col_hist, {'mid': mid, 'type': ty, 'val': val, 'desc': desc, 'ct': tnow})
+        ret = yield motordb.mongo_insert_one(col_hist, {'mid': mid, 'type': ty, 'val': val, 'desc': desc, 'ct': tnow, 'day': today})
         if not ret:
             raise gen.Return(False)
 
-    if ty == PW_TYPE_LOGIN:
+    elif ty == PW_TYPE_LOGIN:
         # check whether login today
-        today = int(time.strftime("%Y%m%d", time.localtime(time.time())))
         doc = yield motordb.mongo_find_one(col_hist, {'mid': mid, 'type': ty, 'day': today})
         if doc:
             raise gen.Return(False)
         if doc is False:
             log.error("power.add_change_hist@db error@check whether login today")
             raise gen.Return(False)
+
+        ret = yield motordb.mongo_insert_one(col_hist, {'mid': mid, 'type': ty, 'val': val, 'desc': desc, 'ct': tnow, 'day': today})
+        if not ret:
+            log.error("power.add_change_hist@db error@insert login bonus failed, duplicate?")
+            raise gen.Return(False)
+
+    else:
+        raise gen.Return(False)
 
     raise gen.Return(True)
 
@@ -73,7 +82,9 @@ def change(mid, ty, val, desc):
     # add into mine.power
     tnow = int(time.time())
     col_mine = get_col_mine_mine()
-    doc = yield motordb.mongo_find_one_and_update(col_mine, {'_id': mid}, {'$inc': {'power': val}, '$set': {'ut': tnow}})
+
+    # insert it if not exists
+    doc = yield motordb.mongo_find_one_and_update(col_mine, {'_id': mid}, {'$inc': {'power': val}, '$set': {'ut': tnow}}, upsert=True)
     if not doc:
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
 
