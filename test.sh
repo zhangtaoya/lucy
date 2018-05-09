@@ -1,5 +1,5 @@
 srv=http://127.0.0.1:9000
-phone=15910655734
+phone=15910655738
 curl -d '{"phone":'$phone'}' $srv/api/account/reg_verify
 echo ""
 
@@ -14,6 +14,7 @@ echo ""
 
 curl -d '{"phone":'$phone',"ts":12221,"passwd":"d2f2297d6e829cd3493aa7de4416a18f","sign":"ds"}' $srv/api/account/login_phone
 echo ""
+exit
 
 curl -d '{"mid":1,"ts":12221,"passwd":"d2f2297d6e829cd3493aa7de4416a18f","sign":"ds"}' $srv/api/account/logout
 echo ""
