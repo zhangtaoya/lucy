@@ -121,7 +121,7 @@ class AccountLoginPhoneHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.info('%s params:%s' % (self._label, ujson.dumps(self.params)))
         phone = self.params.get('phone', 0)
         ts = int(self.params.get('ts', 0))
         passwd_md5 = self.params.get('passwd', '')

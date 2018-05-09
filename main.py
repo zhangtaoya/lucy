@@ -37,7 +37,7 @@ def main():
         template_path='./template',
         static_path='./static',
     )
-
+    log.set_level('requests', 'DEBUG')
     log.info('zuiyou web listen on %d' % options.port)
 
     app.listen(options.port, xheaders=True)
