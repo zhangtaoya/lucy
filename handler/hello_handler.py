@@ -7,11 +7,9 @@ import log
 
 
 class HelloHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         ret = yield account_service.account_hello(1112)
         self.jsonify(ret)
 

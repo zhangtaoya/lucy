@@ -9,11 +9,9 @@ from service import mine_service
 
 
 class AccountReg_verifyHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         phone = self.params.get('phone', '')
         if str(phone).isdigit() is False:
             self.jsonify({'ret': -1, 'data': {'msg': '手机号格式不正确'}})
@@ -27,11 +25,9 @@ class AccountReg_verifyHandler(BaseHandler):
 
 
 class AccountRegHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         phone = int(self.params.get('phone', 0))
         verify_code_md5 = self.params.get('verify_code', '')
         passwd_encry = self.params.get('passwd', '')
@@ -58,22 +54,18 @@ class AccountRegHandler(BaseHandler):
 
 
 class AccountPasswd_verifyHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         phone = int(self.params.get('phone', 0))
         ret = yield account_service.passwd_verify(phone)
         self.jsonify(ret)
 
 
 class AccountPasswdHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         phone = int(self.params.get('phone', 0))
         verify_code_md5 = self.params.get('verify_code', '')
         passwd_encry = self.params.get('passwd', '')
@@ -98,11 +90,9 @@ class AccountPasswdHandler(BaseHandler):
 
 
 class AccountLoginHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         mid = int(self.params.get('mid', 0))
         ts = int(self.params.get('ts', 0))
         passwd_md5 = self.params.get('passwd', '')
@@ -117,11 +107,9 @@ class AccountLoginHandler(BaseHandler):
 
 
 class AccountLoginPhoneHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.info('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.info('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         phone = self.params.get('phone', 0)
         ts = int(self.params.get('ts', 0))
         passwd_md5 = self.params.get('passwd', '')
@@ -140,11 +128,9 @@ class AccountLoginPhoneHandler(BaseHandler):
 
 
 class AccountLogoutHandler(BaseHandler):
-    _label = 'HelloHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         mid = int(self.params.get('mid', 0))
         ts = int(self.params.get('ts', 0))
         passwd_md5 = self.params.get('passwd', '')

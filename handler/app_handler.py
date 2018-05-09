@@ -7,11 +7,9 @@ import log
 
 
 class AppAddHandler(BaseHandler):
-    _label = 'AddAppHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         app = {
             'name': self.params.get('name', ''),
             'ver': self.params.get('ver', ''),
@@ -33,11 +31,9 @@ class AppAddHandler(BaseHandler):
 
 
 class AppViewHandler(BaseHandler):
-    _label = 'AddAppHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         ts = int(self.params.get('ts', 0))
         mid = int(self.params.get('mid', 0))
         offset = int(self.params.get('offset', 0))
@@ -47,11 +43,9 @@ class AppViewHandler(BaseHandler):
 
 
 class AppDownloadHandler(BaseHandler):
-    _label = 'AddAppHandler'
-
     @gen.coroutine
     def post(self):
-        log.debug('%s params:%s' % (self._label, ujson.dumps(self.params)))
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         mid = int(self.params.get('mid', 0))
         appid = int(self.params.get('appid', 0))
         ver = self.params.get('ver', '')
