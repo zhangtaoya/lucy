@@ -123,7 +123,9 @@ class AccountLoginPhoneHandler(BaseHandler):
             self.jsonify(ret)
             return
 
-        ret = yield account_service.login(ret['data']['mid'], passwd_md5)
+        mid = ret['data']['mid']
+        ret = yield account_service.login(mid, passwd_md5)
+        mine_service.login_bonus(mid)
         self.jsonify(ret)
 
 
