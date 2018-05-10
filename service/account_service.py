@@ -235,8 +235,7 @@ def logout(mid, passwd_app_md5):
 
     if get_md5(passwd) != passwd_app_md5:
         raise gen.Return({'ret': -1053, 'data': {'msg': "退出成功！"}})
- 
-    
+
     key = mid_nonce_cache_key(mid)
     cache = get_redis()
     cache.delete(key)
