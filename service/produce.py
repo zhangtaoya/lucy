@@ -74,7 +74,7 @@ def collect_coin(mid):
         log.error('produce.collect_coin@query col_produce, mid:%s' % mid)
         raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
     if not doc:
-        log.warn('produce.collect_coin@not reg, mid:%s' % mid)
+        log.warning('produce.collect_coin@not reg, mid:%s' % mid)
         raise gen.Return({'ret': -1, 'data': {'msg': '您还未注册~'}})
 
     produce = doc.get('produce')

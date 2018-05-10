@@ -42,7 +42,7 @@ def mongo_insert_one(col, item, returnid=False):
             raise gen.Return(True)
     except (OperationFailure, AutoReconnect) as e:
         stritem = dumps(item)
-        logging.warn("mongo_insert failed, item %s, reason %s" % (stritem[0:10240], str(e)))
+        logging.warning("mongo_insert failed, item %s, reason %s" % (stritem[0:10240], str(e)))
         raise gen.Return(False)
 
 
