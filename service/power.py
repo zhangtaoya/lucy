@@ -30,6 +30,9 @@ PW_TYPE_LOGIN = 2
 
 @gen.coroutine
 def add_change_hist(mid, ty, val, desc):
+    if not mid or not ty or not val:
+        raise gen.Return({'ret': -1, 'data': {'msg': '参数错误'}})
+
     col_hist = get_col_mine_power_history()
     tnow = int(time.time())
     today = int(time.strftime("%Y%m%d", time.localtime(time.time())))
@@ -71,6 +74,9 @@ def add_change_hist(mid, ty, val, desc):
 
 @gen.coroutine
 def change(mid, ty, val, desc):
+    if not mid or not ty or not val:
+        raise gen.Return({'ret': -1, 'data': {'msg': '参数错误'}})
+
     mid = int(mid)
     ty = int(ty)
     val = float(val)

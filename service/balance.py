@@ -26,6 +26,9 @@ BL_TYPE_MINE = 3  # 挖矿
 @gen.coroutine
 def add_change_hist(mid, ty, val, desc):
     para = 'mid:%s, type:%s, val:%s, desc:%s' % (mid, ty, val, desc)
+    if not mid or not ty or not val:
+        raise gen.Return({'ret': -1, 'data': {'msg': '参数错误'}})
+
     col_hist = get_col_mine_balance_history()
     tnow = int(time.time())
     if ty == BL_TYPE_REG:
@@ -62,6 +65,9 @@ def add_change_hist(mid, ty, val, desc):
 
 @gen.coroutine
 def change(mid, ty, val, desc):
+    if not mid or not ty or not val:
+        raise gen.Return({'ret': -1, 'data': {'msg': '参数错误'}})
+
     mid = int(mid)
     ty = int(ty)
     val = float(val)

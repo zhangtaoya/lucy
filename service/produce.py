@@ -26,27 +26,16 @@ PR_HOUR_FOR_RIPE = 8
 PR_HOUR_FOR_LOST = 24
 
 PR_STATUS_MINING = 1
-PR_STATUS_MINE_LOST = 2
+PR_STATUS_MINE_RIPE = 2
+PR_STATUS_MINE_LOST = 3
 
 
 @gen.coroutine
-def start_mine(mid):
+def refresh_mine(mid):
     mid = int(mid)
 
     col_mine = get_col_mine_mine()
     doc = yield motordb.mongo_find_one(col_mine, {'_id': mid})
-
-    # S1. check whether already started
-    if doc is False:
-        log.error('produce.start_mine@query col_produce, mid:%s' % mid)
-        raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
-    if not doc:
-        log.warn('produce.start_mine@not reg, mid:%s' % mid)
-        raise gen.Return({'ret': -1, 'data': {'msg': '您还未注册~'}})
-
-    produce = doc.get('produce')
-    if produce:
-        raise gen.Return({'ret': -1, 'data': {'msg': '正在挖矿中...'}})
 
     # S2. get power
     power = doc.get('power', 0)
@@ -91,15 +80,16 @@ def collect_coin(mid):
     produce = doc.get('produce')
     # S1. check whether already started
     if not produce:
-        raise gen.Return({'ret': -1, 'data': {'msg': '还未开始挖矿'}})
+        ret = yield refresh_mine(mid)
+        raise gen.Return(ret)
 
     # S2. check whether expired
     t_now = int(time.time())
     t_end = produce.get('t_end', 0)
     if t_now > t_end:
-        yield motordb.mongo_update_one(col_mine, {'_id': mid}, {'$unset': {'produce': 1}})
         log.info('produce.collect_coin@mid:%s coin loss, detail:%s' % (mid, ujson.dumps(produce)))
-        raise gen.Return({'ret': -1, 'data': {'msg': '您的矿已流失', 'status': PR_STATUS_MINE_LOST}})
+        yield refresh_mine(mid)
+        raise gen.Return({'ret': -1, 'data': {'msg': '您的矿已流失'}})
 
     # S3. check whether ripe
     t_ripe = produce.get('t_ripe', 0)
@@ -118,3 +108,20 @@ def collect_coin(mid):
 
     log.info('produce.collect_coin@succeed. for mid:%s, produce:%s' % (mid, ujson.dumps(produce, ensure_ascii=False)))
     raise gen.Return({'ret': 1, 'data': {'coin': val}})
+
+
+def build_produce_info(produce_info):
+    t_ripe = produce_info['t_ripe']
+    t_end = produce_info['t_end']
+    ts_now = int(time.time())
+
+    t_left = t_ripe - ts_now
+    t_missing = t_end - ts_now
+
+    produce_info['t_left'] = t_left
+    if t_missing < 0:
+        produce_info['status'] = PR_STATUS_MINE_LOST
+    elif t_left < 0:
+        produce_info['status'] = PR_STATUS_MINE_RIPE
+    else:
+        produce_info['status'] = PR_STATUS_MINING
