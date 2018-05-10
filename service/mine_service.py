@@ -57,11 +57,11 @@ def collect_coin(mid):
     # change for balance
     log.info("mine.collect_coin@produce ret:" + ujson.dumps(ret, ensure_ascii=False))
     val = ret.get('data').get('coin')
-    ret = yield balance.change(mid, balance.BL_TYPE_MINE, val, "挖矿收益")
-    if ret.get('ret') != 1:
-        log.error(str(mid) + "@mine.collect_coin@need rollback@produce ret:" + ujson.dumps(ret, ensure_ascii=False) +
-                  ", failed upon balance change, ret:" + ujson.dumps(ret, ensure_ascii=False))
-        raise gen.Return(ret)
+    ret_balance = yield balance.change(mid, balance.BL_TYPE_MINE, val, "挖矿收益")
+    if ret_balance.get('ret') != 1:
+        log.error(str(mid) + "@mine.collect_coin@need rollback@produce ret:" + ujson.dumps(ret_balance, ensure_ascii=False) +
+                  ", failed upon balance change, ret:" + ujson.dumps(ret_balance, ensure_ascii=False))
+        raise gen.Return(ret_balance)
 
     # refresh mine if succeed
     yield produce.refresh_mine(mid)
