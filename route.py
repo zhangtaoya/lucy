@@ -20,7 +20,6 @@ routes = [
     (r'/api/my/download_history', MyDownloadHistoryHandler),
 
     (r'/api/mine/info', MineInfoHandler),
-    (r'/api/mine/start', MineStartHandler),
     (r'/api/mine/collect', MineCollectHandler),
 
 ]

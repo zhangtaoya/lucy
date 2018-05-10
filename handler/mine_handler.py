@@ -15,15 +15,6 @@ class MineInfoHandler(BaseHandler):
         self.jsonify(ret)
 
 
-class MineStartHandler(BaseHandler):
-    @gen.coroutine
-    def post(self):
-        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
-        mid = int(self.params.get('mid', 0))
-        ret = yield mine_service.start_mine(mid)
-        self.jsonify(ret)
-
-
 class MineCollectHandler(BaseHandler):
     @gen.coroutine
     def post(self):
