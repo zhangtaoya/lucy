@@ -94,7 +94,7 @@ def collect_coin(mid):
     # S3. check whether ripe
     t_ripe = produce.get('t_ripe', 0)
     if t_now < t_ripe:
-        t_left = int(time.time()) - t_ripe
+        t_left = t_ripe - int(time.time())
         if t_left > PR_HOUR_FOR_RIPE * 3600 or t_left < 0:
             t_left = PR_HOUR_FOR_RIPE * 3600
         raise gen.Return({'ret': -1, 'data': {'msg': '正在挖矿中...', 'status': PR_STATUS_MINING, 't_left': t_left}})
