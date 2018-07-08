@@ -157,8 +157,6 @@ def passwd_verify(phone):
     if verify_key:
         raise gen.Return({'ret': -1022, 'data': {'msg': "此手机号已经获取了验证码，请稍后再获取吧"}})
 
-    
-
     verify_code = yield send_verify_code(phone)
 
     cache = get_redis()
