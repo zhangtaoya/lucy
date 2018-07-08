@@ -2,7 +2,7 @@ import ujson
 from datetime import datetime
 import traceback
 from tornado import web
-import haslib
+import hashlib
 import log
 
 
