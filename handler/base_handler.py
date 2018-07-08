@@ -49,7 +49,7 @@ class BaseHandler(web.RequestHandler):
         sign_server = hashlib.md5(self.request.body+'u29c0msd9envd').hexdigest()
         if sign_server != sign_client:
             log.error('body:%s,sign_client:%s, sign_server:%s,api:%s, not match' %
-                      (self.request.body, sign_client, sign_server, uri))
+                      (self.request.body, sign_client, sign_server, self.request.uri))
             self.jsonify({'ret': -1})
             return
 
