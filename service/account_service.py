@@ -10,7 +10,7 @@ from lib.db import get_redis
 from lib.db import *
 from config import config
 import log
-import md5
+import hashlib
 import time
 import random
 import sys
@@ -44,10 +44,8 @@ def get_cached_verifycode(phone):
 
 
 def get_md5(src):
-    src = str(src)
-    m = md5.new()
-    m.update(src)
-    return m.hexdigest()
+    md5_str = hashlib.md5(src).hexdigest()
+    return md5_str
 
 
 def lucy_decry(key, encry_txt):
