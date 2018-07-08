@@ -113,8 +113,7 @@ class AccountLoginPhoneHandler(BaseHandler):
         phone = self.params.get('phone', 0)
         ts = int(self.params.get('ts', 0))
         passwd_md5 = self.params.get('passwd', '')
-        sign = self.params.get('sign', '')
-        if not phone or not ts or not sign:
+        if not phone or not ts:
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
             return
 

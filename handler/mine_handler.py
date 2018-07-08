@@ -43,3 +43,37 @@ class MineCollectHandler(BaseHandler):
             mid = ret['data']['mid']
         ret = yield mine_service.collect_coin(mid)
         self.jsonify(ret)
+
+
+class MineAddrVerifyHandler(BaseHandler):
+    @gen.coroutine
+    def post(self):
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
+        mid = int(self.params.get('mid', 0))
+        ret = yield account_service.get_phone_by_mid(mid)
+        if ret.get('ret') != 1:
+            self.jsonify({'ret': -1, 'data': {'msg': "账号未注册"}})
+            return
+        phone = ret['data']['phone']
+        ret = yield account_service.addr_verify(phone)
+        self.jsonify(ret)
+
+
+class MineAddrResetHandler(BaseHandler):
+    @gen.coroutine
+    def post(self):
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
+        mid = int(self.params.get('mid', 0))
+        verify_code_md5 = self.params.get('verify_code', '')
+        addr = self.params.get('addr', '')
+        if not mid or not verify_code_md5 or not addr:
+            self.jsonify({'ret': -1, 'data': {'msg': "数据错误"}})
+            return
+
+        ret = yield account_service.get_phone_by_mid(mid)
+        if ret.get('ret') != 1:
+            self.jsonify({'ret': -1, 'data': {'msg': "账号未注册"}})
+            return
+        phone = ret['data']['phone']
+        ret = yield account_service.addr_reset(mid, phone, addr, verify_code_md5)
+        self.jsonify(ret)

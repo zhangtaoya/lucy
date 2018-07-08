@@ -36,8 +36,19 @@ def mid_nonce_cache_key(mid):
     return str(mid) + "_nonce"
 
 
+def phone_addrcode_cache_key(phone):
+    return str(phone) + "_addr"
+
+
 def get_cached_verifycode(phone):
     cache_key = phone_verifycode_cache_key(phone)
+    cache = get_redis()
+    verify_code = cache.get(cache_key)
+    return verify_code
+
+
+def get_cached_addrverifycode(phone):
+    cache_key = phone_addrcode_cache_key(phone)
     cache = get_redis()
     verify_code = cache.get(cache_key)
     return verify_code
@@ -143,7 +154,6 @@ def reg(phone, verify_code_app_md5, passwd_encry):
 @gen.coroutine
 def passwd_verify(phone):
     phone = int(phone)
-    phone_str = str(phone)
     col = get_col_account_member()
     doc = yield motordb.mongo_find_one(col, {'phone': phone})
     if doc is False:
@@ -163,8 +173,56 @@ def passwd_verify(phone):
     cache_key = phone_verifycode_cache_key(phone)
     cache.set(cache_key, verify_code)
     cache.expire(cache_key, TTL_VERIFY_CODE)
-    #raise gen.Return({'ret': 1, 'data': {'code': verify_code}})
     raise gen.Return({'ret': 1})
+
+
+@gen.coroutine
+def addr_verify(phone):
+    phone = int(phone)
+    col = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col, {'phone': phone})
+    if doc is False:
+        log.error("db failed")
+        raise gen.Return({'ret': -1, 'data': {'msg': "服务器正忙，请稍后再试吧"}})
+
+    if not doc:
+        raise gen.Return({'ret': -1021, 'data': {'msg': "此手机号未注册"}})
+
+    verify_key = phone_addrcode_cache_key(phone)
+    if verify_key:
+        raise gen.Return({'ret': -1022, 'data': {'msg': "此手机号已经获取了验证码，请稍后再获取吧"}})
+
+    verify_code = yield send_verify_code(phone)
+
+    cache = get_redis()
+    cache_key = phone_addrcode_cache_key(phone)
+    cache.set(cache_key, verify_code)
+    cache.expire(cache_key, TTL_VERIFY_CODE)
+    raise gen.Return({'ret': 1})
+
+
+@gen.coroutine
+def addr_reset(mid, phone, addr, verify_code_app_md5):
+    col = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col, {'phone': phone})
+    if not doc:
+        raise gen.Return({'ret': -1031, 'data': {'msg': "未查到该用户!"}})
+    if mid != doc['_id']:
+        raise gen.Return({'ret': -1031, 'data': {'msg': "用户资料错误!"}})
+
+    verify_code_srv = get_cached_addrverifycode(phone)
+    if not verify_code_srv:
+        raise gen.Return({'ret':-1032, 'data': {'msg': '验证码已经过期，请重新获取验证码。'}})
+
+    verify_code_srv_md5 = get_md5(verify_code_srv)
+    if verify_code_srv_md5 != verify_code_app_md5:
+        raise gen.Return({'ret':-1033, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
+
+    ret = yield motordb.mongo_update_one(col, {'mid': mid}, {'$set': {'addr': addr}})
+    if not ret:
+        raise gen.Return({'ret': -1032, 'data': {'msg': '服务器忙，请稍后再试。'}})
+
+    raise gen.Return({'ret':1})
 
 
 @gen.coroutine
@@ -251,4 +309,16 @@ def get_mid_by_phone(phone):
 
     mid = int(doc['_id'])
     raise gen.Return({'ret': 1, 'data': {'mid': mid}})
+
+
+@gen.coroutine
+def get_phone_by_mid(mid):
+    mid = int(mid)
+    col = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col, {'_id': mid})
+    if not doc:
+        raise gen.Return({'ret': -1, 'data': {'msg': '手机号码未注册'}})
+
+    phone = int(doc['phone'])
+    raise gen.Return({'ret': 1, 'data': {'phone': phone}})
 

@@ -22,6 +22,7 @@ routes = [
     (r'/api/mine/info', MineInfoHandler),
     (r'/api/mine/collect', MineCollectHandler),
 
-    (r'/api/mine/reg_verify', MineCollectHandler),
+    (r'/api/mine/addr_verify', MineAddrVerifyHandler),
+    (r'/api/mine/addr_reset', MineAddrResetHandler),
 
 ]
