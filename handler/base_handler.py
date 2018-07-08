@@ -2,6 +2,8 @@ import ujson
 from datetime import datetime
 import traceback
 from tornado import web
+import haslib
+import log
 
 
 class BaseHandler(web.RequestHandler):
@@ -22,6 +24,21 @@ class BaseHandler(web.RequestHandler):
             self.user_agent = self.request.headers['User-Agent'].lower()
         if self.request.body:
             self.params = ujson.loads(self.request.body)
+        self.sign_check()
+
+    def sign_check(self):
+        uri = self.request.uri
+        arr = uri.split('?sign=')
+        if len(arr) != 2:
+            self.jsonify({'ret': -1})
+            return
+        sign_client = arr[1]
+        sign_server = hashlib.md5(self.request.body+'u29c0msd9envd').hexdigest()
+        if sign_server != sign_client:
+            log.error('body:%s,sign_client:%s, sign_server:%s,api:%s, not match' %
+                      (self.request.body, sign_client, sign_server, uri))
+            self.jsonify({'ret': -1})
+            return
 
     def on_finish(self):
         pass
@@ -67,5 +84,3 @@ class BaseHandler(web.RequestHandler):
                             "code": status_code,
                             "message": self._reason,
                         })
-
-
