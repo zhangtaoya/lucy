@@ -38,7 +38,7 @@ def main():
         static_path='./static',
     )
     log.set_level(None, 'DEBUG')
-    log.info('zuiyou web listen on %d' % options.port)
+    log.info('tangcity listen on %d' % options.port)
 
     app.listen(options.port, xheaders=True)
     ioloop.IOLoop.instance().start()
