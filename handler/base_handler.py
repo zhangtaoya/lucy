@@ -26,13 +26,26 @@ class BaseHandler(web.RequestHandler):
             self.params = ujson.loads(self.request.body)
         self.sign_check()
 
-    def sign_check(self):
+    def get_uri_params(self):
         uri = self.request.uri
-        arr = uri.split('?sign=')
-        if len(arr) != 2:
+        uri_str_arr = uri.split('?')
+        if len(uri_str_arr) < 2:
+            return {}
+        para_str = uri_str_arr[1]
+        para_str_arr = para_str.split('&')
+        para = {}
+        for para_str in para_str_arr:
+            kv = para_str.split('=')
+            if len(kv) == 2:
+                para[kv[0]] = kv[1]
+        return para
+
+    def sign_check(self):
+        para_uri = self.get_uri_params()
+        sign_client = para_uri.get('sign')
+        if not sign_client:
             self.jsonify({'ret': -1})
             return
-        sign_client = arr[1]
         sign_server = hashlib.md5(self.request.body+'u29c0msd9envd').hexdigest()
         if sign_server != sign_client:
             log.error('body:%s,sign_client:%s, sign_server:%s,api:%s, not match' %
