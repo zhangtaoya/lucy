@@ -15,3 +15,11 @@ class MyDownloadHistoryHandler(BaseHandler):
         ret = yield my_service.download_history(mid, offset)
         self.jsonify(ret)
 
+
+class UserInfoHandler(BaseHandler):
+    @gen.coroutine
+    def post(self):
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
+        mid = int(self.params.get('mid', 0))
+        ret = yield my_service.user_info(mid)
+        self.jsonify(ret)

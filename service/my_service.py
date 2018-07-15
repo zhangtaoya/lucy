@@ -40,6 +40,27 @@ def download_history(mid, offset):
     else:
         doc_list = doc_list[0: HIST_PAGE]
 
-    raise gen.Return({'ret':1, 'data': {'more': more, 'list': doc_list, 'count': len(doc_list)}})
+    raise gen.Return({'ret': 1, 'data': {'more': more, 'list': doc_list, 'count': len(doc_list)}})
 
 
+@gen.coroutine
+def user_info(mid):
+    mid = int(mid)
+    col_member = get_col_account_member()
+    doc = yield motordb.mongo_find_one(col_member, {'_id': mid})
+    if not doc:
+        raise gen.Return({'ret': -1011, 'data': {'msg': "未找到用户信息!"}})
+
+    name = doc.get('name', '')
+
+    col_mine = get_col_mine_mine()
+    doc = yield motordb.mongo_find_one(col_mine, {'_id': mid})
+    if doc is False:
+        log.error('my.user_info@query col_produce, mid:%s' % mid)
+        raise gen.Return({'ret': -1, 'data': {'msg': '服务器忙，请稍后再试吧~'}})
+
+    power = doc.get('power', 0)
+    balance = doc.get('balance', 0)
+
+    raise gen.Return({'ret': 1, 'data': {'name': name, 'power': power, 'balance': balance,
+                                         'url_white_paper': 'http://www.baidu.com'}})

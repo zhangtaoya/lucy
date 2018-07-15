@@ -18,11 +18,15 @@ routes = [
     (r'/api/app/download', AppDownloadHandler),
 
     (r'/api/my/download_history', MyDownloadHistoryHandler),
+    (r'/api/user/info', UserInfoHandler),
 
     (r'/api/mine/info', MineInfoHandler),
     (r'/api/mine/collect', MineCollectHandler),
 
     (r'/api/mine/addr_verify', MineAddrVerifyHandler),
     (r'/api/mine/addr_reset', MineAddrResetHandler),
+
+    (r'/api/mine/withdraw', MineWithdrawHandler),
+    (r'/api/mine/bonus', MineBonusHandler),
 
 ]
