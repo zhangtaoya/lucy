@@ -275,7 +275,7 @@ def login(mid, passwd_app_md5):
     cache.expire(key, TTL_NONCE)
 
     nonce_encry = get_md5(nonce)
-    raise gen.Return({'ret':1, 'data':{'nonce': nonce_encry}})
+    raise gen.Return({'ret': 1, 'data': {'nonce': nonce_encry, 'mid': mid}})
 
 
 @gen.coroutine
