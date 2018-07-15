@@ -33,6 +33,8 @@ def add_change_hist(mid, ty, val, desc):
 
     col_hist = get_col_mine_balance_history()
     tnow = int(time.time())
+    today = int(time.strftime("%Y%m%d", time.localtime(tnow)))
+
     if ty == BL_TYPE_REG:
         # check whether already registered
         doc = yield motordb.mongo_find_one(col_hist, {'mid': mid, 'type': ty})
@@ -46,7 +48,6 @@ def add_change_hist(mid, ty, val, desc):
 
     elif ty == BL_TYPE_LOGIN:
         # check whether login today
-        today = int(time.strftime("%Y%m%d", time.localtime(time.time())))
         doc = yield motordb.mongo_find_one(col_hist, {'mid': mid, 'type': ty, 'day': today})
         if doc:
             raise gen.Return(False)
@@ -54,11 +55,20 @@ def add_change_hist(mid, ty, val, desc):
             log.error("balance.add_change_hist@db error@check whether login today:" + para)
             raise gen.Return(False)
 
-    elif ty != BL_TYPE_MINE:
+    elif ty in [BL_TYPE_DOWNLOAD_APP, BL_TYPE_VIEW_NEWS]:
+        n_cnt = yield motordb.mongo_find_count(col_hist, {'mid': mid, 'type': ty, 'day': today})
+        if n_cnt is False:
+            log.error("balance.add_change_hist@db error@check cnt:" + para)
+            raise gen.Return(False)
+        if n_cnt >= 2:
+            raise gen.Return(False)
+
+    elif ty not in [BL_TYPE_MINE, ]:
         log.error("balance.add_change_hist@unrecognized change: " + para)
         raise gen.Return(False)
 
-    ret = yield motordb.mongo_insert_one(col_hist, {'mid': mid, 'type': ty, 'val': val, 'desc': desc, 'ct': tnow})
+    ret = yield motordb.mongo_insert_one(col_hist,
+                                         {'mid': mid, 'type': ty, 'val': val, 'desc': desc, 'ct': tnow, 'day': today})
     if not ret:
         raise gen.Return(False)
 
@@ -96,13 +106,7 @@ def dync_bonus(mid, ty):
     if ty not in [BL_TYPE_DOWNLOAD_APP, BL_TYPE_VIEW_NEWS]:
         raise gen.Return({'ret': -1, 'data': {'msg': '不能识别的奖励类型'}})
 
-    # check whether get this bonus in 24 hours
-    col_mine = get_col_mine_mine()
-    doc = yield motordb.mongo_find_one(col_mine, {'_id': mid})
-    if not doc:
-        raise gen.Return({'ret': -1, 'data': {'msg': '账户不存在'}})
-
-    _bonus = doc.get('dync_bonus')
-    if _bonus:
-        ty_info = _bonus.get(str(ty))
-        ntime = ty_info
+    VAL_MAP = {BL_TYPE_DOWNLOAD_APP: 5, BL_TYPE_VIEW_NEWS: 10}
+    DESC_MAP = {BL_TYPE_DOWNLOAD_APP: '下载app', BL_TYPE_VIEW_NEWS: '阅读咨询'}
+    ret = yield change(mid, ty, VAL_MAP[ty], DESC_MAP[ty])
+    raise gen.Return(ret)
