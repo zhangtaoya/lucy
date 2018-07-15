@@ -149,7 +149,7 @@ class AccountUpdateHandler(BaseHandler):
     def post(self):
         log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
         mid = int(self.params.get('mid', 0))
-        name = int(self.params.get('name', ''))
+        name = self.params.get('name', '')
         token = self.params.get('token', '')
         avatar = self.params.get('avatar', '')
         if not mid or not name or not token:
