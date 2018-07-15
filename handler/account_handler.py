@@ -156,5 +156,10 @@ class AccountUpdateHandler(BaseHandler):
             self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
             return
 
+        ret = account_service.verify_token(mid, token)
+        if ret.get('ret') != 1:
+            self.jsonify(ret)
+            return
+
         ret = yield account_service.update(mid, name, avatar)
         self.jsonify(ret)

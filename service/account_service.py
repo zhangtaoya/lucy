@@ -237,7 +237,20 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     ret = yield motordb.mongo_update_one(col, {'phone': phone}, {'$set': {'passwd': passwd}})
 
     raise gen.Return({'ret':1, 'data':{'mid': mid, 'passwd': get_md5(passwd)}})
-    
+
+
+def verify_token(mid, token):
+    key = mid_nonce_cache_key(mid)
+    cache = get_redis()
+    nonce = cache.get(key)
+    if not nonce:
+        return {'ret': -1052, 'data': {'msg': "用户状态异常，请重置登陆密码!"}}
+
+    nonce_encry = get_md5(nonce)
+    if nonce_encry != token:
+        return {'ret': -1052, 'data': {'msg': "token错误!"}}
+    return {'ret': 1}
+
 
 @gen.coroutine
 def login(mid, passwd_app_md5):
@@ -313,3 +326,12 @@ def get_phone_by_mid(mid):
     phone = int(doc['phone'])
     raise gen.Return({'ret': 1, 'data': {'phone': phone}})
 
+
+@gen.coroutine
+def update(mid, name, avatar):
+    upd = {'name': name}
+    if avatar:
+        upd = {'avatar': avatar}
+    col = get_col_account_member()
+    yield motordb.mongo_update_one(col, {'_id': mid}, {'$set': upd})
+    raise gen.Return({'ret': 1})
