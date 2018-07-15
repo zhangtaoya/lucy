@@ -179,8 +179,8 @@ def addr_verify(phone):
     if not doc:
         raise gen.Return({'ret': -1021, 'data': {'msg': "此手机号未注册"}})
 
-    verify_key = phone_addrcode_cache_key(phone)
-    if verify_key:
+    verify_code_srv = get_cached_addrverifycode(phone)
+    if verify_code_srv:
         raise gen.Return({'ret': -1022, 'data': {'msg': "此手机号已经获取了验证码，请稍后再获取吧"}})
 
     verify_code = yield send_verify_code(phone)
