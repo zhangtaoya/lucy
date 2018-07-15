@@ -55,21 +55,12 @@ def get_cached_addrverifycode(phone):
 
 
 def get_md5(src):
-    md5_str = hashlib.md5(src).hexdigest()
+    md5_str = hashlib.md5(str(src)).hexdigest()
     return md5_str
 
 
 def lucy_decry(key, encry_txt):
     return encry_txt.replace(key, '')
-
-
-def lucy_encry(key, txt):
-    return get_md5(key) + str(txt)
-
-
-def lucy_sign(key, txt):
-    src = str(key) + txt
-    return get_md5(src)
 
 
 def rand_str():
@@ -140,7 +131,7 @@ def reg(phone, verify_code_app_md5, passwd_encry):
     if verify_code_srv_md5 != verify_code_app_md5:
         raise gen.Return({'ret':-1013, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
 
-    passwd = lucy_decry(verify_code_srv, passwd_encry)
+    passwd = passwd_encry
     mid = yield gen_mid()
     if not mid:
         log.error("gen mid failed")
@@ -242,7 +233,7 @@ def passwd(phone, verify_code_app_md5, passwd_encry):
     if verify_code_srv_md5 != verify_code_app_md5:
         raise gen.Return({'ret':-1033, 'data': {'msg': '验证码不正确，请重新输入验证码。'}})
 
-    passwd = lucy_decry(verify_code_srv, passwd_encry)
+    passwd = passwd_encry
     ret = yield motordb.mongo_update_one(col, {'phone': phone}, {'$set': {'passwd': passwd}})
 
     raise gen.Return({'ret':1, 'data':{'mid': mid, 'passwd': get_md5(passwd)}})
@@ -270,7 +261,7 @@ def login(mid, passwd_app_md5):
     cache.set(key, nonce)
     cache.expire(key, TTL_NONCE)
 
-    nonce_encry = lucy_encry(passwd, nonce)
+    nonce_encry = get_md5(nonce)
     raise gen.Return({'ret':1, 'data':{'nonce': nonce_encry}})
 
 

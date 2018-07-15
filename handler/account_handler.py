@@ -143,3 +143,18 @@ class AccountLogoutHandler(BaseHandler):
         ret = yield account_service.logout(mid, passwd_md5)
         self.jsonify(ret)
 
+
+class AccountUpdateHandler(BaseHandler):
+    @gen.coroutine
+    def post(self):
+        log.debug('%s params:%s' % (self.__class__.__name__, ujson.dumps(self.params)))
+        mid = int(self.params.get('mid', 0))
+        name = int(self.params.get('name', ''))
+        token = self.params.get('token', '')
+        avatar = self.params.get('avatar', '')
+        if not mid or not name or not token:
+            self.jsonify({'ret': -1, 'data':{'msg': "网络数据错误！请稍后再试"}})
+            return
+
+        ret = yield account_service.update(mid, name, avatar)
+        self.jsonify(ret)

@@ -12,6 +12,7 @@ routes = [
     (r'/api/account/login', AccountLoginHandler),
     (r'/api/account/login_phone', AccountLoginPhoneHandler),
     (r'/api/account/logout', AccountLogoutHandler),
+    (r'/api/account/update', AccountUpdateHandler),
 
     (r'/api/app/add', AppAddHandler),
     (r'/api/app/view', AppViewHandler),
