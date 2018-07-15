@@ -2,6 +2,7 @@
 import ujson
 from tornado import gen
 from base_handler import BaseHandler
+from service import balance
 from service import app_service
 import log
 
@@ -54,5 +55,6 @@ class AppDownloadHandler(BaseHandler):
             return
             
         ret = yield app_service.download(mid, appid, ver)
+        yield balance.dync_bonus(mid, balance.BL_TYPE_DOWNLOAD_APP)
         self.jsonify(ret)
  
